@@ -1,3 +1,7 @@
+/**
+ * Link Class
+ * Connect 2 pipes together with a constraint
+ */
 class Link {
 	/**
 	 * Create a new link
@@ -7,9 +11,11 @@ class Link {
 	 * @param {array}  reverse   Array of 2 point which change the position of the link on the object
 	 */
 	constructor(pipeA, pipeB, stiffness, reverse) {
-
+		// Save stiffness and reverse as attributes
 		this.stiffness = stiffness
+		this.reverse = reverse
 
+		// Create a default options object
 		let options = {
 			bodyB: pipeB.body,
 			length: 1,
@@ -25,28 +31,33 @@ class Link {
 			}
 		}
 
+		// Set point A to a static point if given
 		if (Array.isArray(pipeA)) {
 			options.pointA = {x: pipeA[0], y: pipeA[1]}
-			options.length = 1
 		}
 		else {
-			options.render.visible = true
-
+			// Otherwise, set it to the body of the given pipe
+			options.bodyA = pipeA.body
 			options.pointA = {
 				x: pipeA.length / 2,
 				y: 0
 			}
-			options.bodyA = pipeA.body
 
+			// Show the links if it's between 2 pipes
+			options.render.visible = true
+
+			// Apply a reversal of position if given to A if it's not a point
 			if (Array.isArray(reverse)) {
 				options.pointA.x = pipeA.length / 2 * reverse[0]
 			}
 		}
 
+		// Apply a reversal of position if given to B
 		if (Array.isArray(reverse)) {
 			options.pointB.x = pipeB.length / 2 * reverse[1]
 		}
 
+		// Create the link and set it as attribute
 		this.body = Constraint.create(options)
 	}
 }

@@ -116,7 +116,7 @@ let links = []
 
 // Top triangle
 //  Diagonal	[0]
-pipes.push(new Pipe(350, 100, 55.8, -1))
+pipes.push(new Pipe(350, 100, 55.8))
 //  Bottom		[1]
 pipes.push(new Pipe(350, 120, 40.1))
 //  Right		[2]
