@@ -1,5 +1,13 @@
 class Link {
+	/**
+	 * Create a new link
+	 * @param {mixed}  pipeA     Either a Pipe class or a X/Y fixed poin position
+	 * @param {object} pipeB     A Pipe class object
+	 * @param {number} stiffness The stiffness of the link between 0 and 1
+	 * @param {array}  reverse   Array of 2 point which change the position of the link on the object
+	 */
 	constructor(pipeA, pipeB, stiffness, reverse) {
+
 		this.stiffness = stiffness
 
 		let options = {
@@ -23,7 +31,7 @@ class Link {
 		}
 		else {
 			options.render.visible = true
-			
+
 			options.pointA = {
 				x: pipeA.length / 2,
 				y: 0

@@ -17,6 +17,11 @@ const Vector = Matter.Vector
 let engine = Engine.create()
 // Create a world
 let world = engine.world
+
+// Set the gravity in this world
+world.gravity.y = 2;
+world.gravity.scale = 0.002;
+
 // Create the renderer
 var render = Render.create({
 	// Add the canvas element
@@ -27,7 +32,6 @@ var render = Render.create({
 		width: 800,
 		height: 600,
 		wireframes: false,
-		// showAngleIndicator: true,
 		background: "#4186E0"
 	}
 })
@@ -39,85 +43,74 @@ Render.run(render)
 let runner = Runner.create()
 Runner.run(runner, engine)
 
+// How far we are in the circle engine loop
 let loop = 0
+// The length of the loop
+let loopLength = 100
+// The radius of the circle arm
 let radius = 15
-let canHelp = false
+// If the grace period has ended
+let gracePeriod = true
+// The hight of the ground in pixels from the top
 let goundHeight = 193
 
-
+// Run every tick
 Events.on(runner, "tick", function() {
+	// Set the X and Y of the motor link to the right frame in the loop
+	motorLink.body.pointA.x = 338 + Math.sin((loop / loopLength) * Math.PI * 2) * radius
+	motorLink.body.pointA.y = 92.2 + Math.sin(((loop / loopLength) + 0.25) * Math.PI * 2) * radius
 
-	// Body.rotate(cir,0.0011)
-	// console.log(lnk.body.pointA)
-	lnk.body.pointA.x = 338 + Math.sin((loop / 100) * Math.PI * 2) * radius
-	lnk.body.pointA.y = 92.2 + Math.sin(((loop / 100) + 0.25) * Math.PI * 2) * radius
+	// If the grace period has ended
+	if (!gracePeriod) {
+		// Let the top helper link move with the top pipe
+		topLink.body.pointA.x = 300 + Math.sin((loop / loopLength) * Math.PI * 2) * radius * 2
 
-	if (canHelp) {
-		tlnk.body.pointA.x = 300 + Math.sin((loop / 100) * Math.PI * 2) * radius * 2
+		// Increment the loop
 		loop++
-		if (loop >= 100) loop = 0
+		// Reset the loop if we've het the max length
+		if (loop >= loopLength) loop = 0
 	}
-	// console.log(Math.sin((loop / 100) * Math.PI * 2) * radius)
-	// console.log(bpipe.body)
-
 
 	let pipeLength = 65.7
-	let y = pipeLength / 2 * Math.sin(bpipe.body.angle)
 
+	// Calculate the Y diff with some hardcore math
+	let y = pipeLength / 2 * Math.sin(diagonalBottomPipe.body.angle)
+	// Do the same for the X diff but with pythagoras
 	let x = Math.sqrt(Math.pow(pipeLength / 2, 2) - Math.pow(y, 2))
 
-	// console.log(goundHeight, y)
-	if (bpipe.body.position.y - y > goundHeight - 3) {
+	// If the diagonal is to the right of the straigt bottom pipe,
+	// reverse the X so it doesn't float on the wrong side
+	if (rightBottomPipe.body.position.x < diagonalBottomPipe.body.position.x) {
+		x *= -1
+	}
+
+	// Check if the leg is touching the ground
+	if (diagonalBottomPipe.body.position.y - y > goundHeight - 3) {
+		// If it is, let the ground move with the leg for this frame by applying a diff
 		Body.setPosition(ground, {
-			x: ground.position.x - (cir.position.x - (bpipe.body.position.x + x)),
+			x: ground.position.x - (frictionCircle.position.x - (diagonalBottomPipe.body.position.x + x)),
 			y: goundHeight + 100
 		})
-		cir.render.fillStyle = "#0f0"
+
+		// Mark the foot as touching
+		frictionCircle.render.fillStyle = "#0f0"
 	}
 	else {
-		cir.render.fillStyle = "#f00"
-
+		// Mark the foot as floating
+		frictionCircle.render.fillStyle = "#f00"
 	}
 
-
-	console.log(cir.position.x - (bpipe.body.position.x + x))
-	Body.setPosition(cir, {
-		x: bpipe.body.position.x + x,
-		y: bpipe.body.position.y - y
+	// Position the circle at the end of the foot
+	Body.setPosition(frictionCircle, {
+		x: diagonalBottomPipe.body.position.x + x,
+		y: diagonalBottomPipe.body.position.y - y
 	})
-	Body.setAngle(cir, 1)
-
-
-	// console.log(bpipe.body.position.y - y)
 })
 
-// Add the group that will contain all bodies
+// Group in which collisions will be disabled
 let group = Body.nextGroup(true)
 
-let cir = Bodies.circle(100, 100, 5, {
-	isStatic: true,
-	collisionFilter: {
-		group: group
-	},
-	render: {
-		fillStyle: "#f00",
-		opacity: 0.4
-	}
-})
-
-const length = 100
-const width = 5
-
-world.gravity.x = 0;
-world.gravity.y = 2;
-world.gravity.scale = 0.002;
-
-setTimeout(function () {
-	world.gravity.y = 1.5;
-	canHelp = true
-	Body.setPosition(ground, {x: 300, y: goundHeight + 100})
-}, 2000)
-
+// Init empty arrays to fill with objects
 let pipes = []
 let links = []
 
@@ -148,10 +141,11 @@ links.push(new Link(pipes[2], pipes[4], 1, [-1, 1]))
 //  Top			[5]
 pipes.push(new Pipe(350, 220, 36.7))
 //  Right		[6]
-pipes.push(new Pipe(440, 220, 49.0))
+let rightBottomPipe = new Pipe(440, 220, 49.0)
+pipes.push(rightBottomPipe)
 //  Diagonal	[7]
-let bpipe = new Pipe(340, 100, 65.7)
-pipes.push(bpipe)
+let diagonalBottomPipe = new Pipe(340, 100, 65.7)
+pipes.push(diagonalBottomPipe)
 
 // Link bottom triangle to square
 links.push(new Link(pipes[3], pipes[5], 1, [-1, 1]))
@@ -173,69 +167,75 @@ links.push(new Link(pipes[8], pipes[0], 1, [-1, -1]))
 links.push(new Link(pipes[9], pipes[5], 1, [-1, 1]))
 links.push(new Link(pipes[8], pipes[9], 1, [1, 1]))
 
+// Link at the top of the leg to keep it up straight
+var topLink = new Link([260, 0], pipes[1], 0.1, [1, 0.8])
+links.push(topLink)
 
-
-var tlnk = new Link([260, 0], pipes[1], 0.1, [1, 0.8])
-links.push(tlnk)
-// links.push(new Link([200, 80], pipes[2], 0.1, [1, -1]))
-
-
-// Pin top to background
+// Link the static point in the top triangle
 links.push(new Link([300, 100], pipes[2], 1))
-var lnk = new Link([338, 92.2], pipes[9], 1)
-links.push(lnk)
 
-// var cir = Bodies.circle(338, 92.2, 15, { isStatic: true, angularVelocity:32 })
+// Link the motor to the connectors
+var motorLink = new Link([338, 92.2], pipes[9], 1)
+links.push(motorLink)
 
+// Empty array for only the physiscs bodies
 let bodies = []
 
+// Go through every link and add its body
 for (let link of links) {
 	bodies.push(link.body)
 }
+// Do the same for the pipes
 for (let pipe of pipes) {
 	bodies.push(pipe.body)
 }
 
-bodies.push(cir)
+// Add them all to the world
+World.add(world, bodies)
 
-World.add(world, bodies);
-// Body.setAngularVelocity( cir, Math.PI/6);
-//
-// setTimeout(function () {
-// 	for (let pipe of pipes) {
-// 		console.log(pipe)
-// 	}
-// }, 2000)
+// Create circle to show if the leg is touching the ground
+let frictionCircle = Bodies.circle(100, 100, 5, {
+	isStatic: true,
+	collisionFilter: {
+		group: group
+	},
+	render: {
+		fillStyle: "#f00",
+		opacity: 0.4
+	}
+})
 
+// Add it to the world
+World.add(world, frictionCircle)
+
+// Create the ground with the green texture
 var ground = Bodies.rectangle(300, 400, 3600, 200, {
 	isStatic: true,
 	render: {
-	sprite: {
-		texture: 'ground.png'
-	}}
-})
-World.add(world, ground);
-
-
-// fit the render viewport to the scene
-Render.lookAt(render, {
-	min: { x: 0, y: 0 },
-	max: { x: 700, y: 600 }
-});
-
-// add mouse control
-var mouse = Mouse.create(render.canvas),
-	mouseConstraint = MouseConstraint.create(engine, {
-		mouse: mouse,
-		constraint: {
-			stiffness: 0.2,
-			render: {
-				visible: false
-			}
+		sprite: {
+			texture: "ground.png"
 		}
-	});
+	}
+})
 
-World.add(world, mouseConstraint);
+// Add that to the world too
+World.add(world, ground)
 
-// keep the mouse in sync with rendering
-render.mouse = mouse;
+
+// Change the camera to keep the leg in the middle
+Render.lookAt(render, {
+	min: {x: 0, y: 0},
+	max: {x: 600, y: 300}
+})
+
+// Grace period timer
+// The first few seconds the leg can flop about all it wants, but after
+// that these more realistic settings come into affect
+setTimeout(function() {
+	// Set the gravity less strongly
+	world.gravity.y = 1.5
+	// Position the ground at the requested height
+	Body.setPosition(ground, {x: 300, y: goundHeight + 100})
+	// Enable the helping top link and motor loop
+	gracePeriod = false
+}, 2000)

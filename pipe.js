@@ -6,7 +6,7 @@ class Pipe {
 
 		console.log(light)
 
-		this.body = Bodies.rectangle(x, y, length, width, {
+		this.body = Bodies.rectangle(x, y, length, 5, {
 			collisionFilter: {
 				group: group
 			},
