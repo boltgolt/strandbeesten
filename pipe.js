@@ -12,8 +12,9 @@ class Pipe {
 			},
 			frictionAir: 0.01,
 			render: {
-				fillStyle: 'transparent',
-				lineWidth: 1
+				fillStyle: "#CFD22B",
+				lineWidth: 1,
+				strokeStyle: "#000"
 			},
 			// isStatic: true,
 			density: light

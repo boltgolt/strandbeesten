@@ -4,11 +4,16 @@ class Link {
 
 		let options = {
 			bodyB: pipeB.body,
-			length: 3,
+			length: 1,
 			stiffness: stiffness,
 			pointB: {
 				x: pipeB.length / 2,
 				y: 0
+			},
+			render: {
+				visible: false,
+				strokeStyle: "rgba(207,210,43,.5)",
+				lineWidth: 5
 			}
 		}
 
@@ -17,6 +22,8 @@ class Link {
 			options.length = 1
 		}
 		else {
+			options.render.visible = true
+			
 			options.pointA = {
 				x: pipeA.length / 2,
 				y: 0
