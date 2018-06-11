@@ -15,9 +15,20 @@ const Vector = Matter.Vector
 
 let group
 
-function startSimulation(dnaString, updateCallback, completedCallback) {
-	// Get the options fromt the DNA
-	const dna = decodeDNA(dnaString)
+function startSimulation(dna, updateCallback, completedCallback) {
+	function createCallbackObject() {
+		return {
+			distance: Math.round(Math.abs(300 - ground.position.x) * 100) / 100,
+			direction: 300 - ground.position.x < 0 ? "left" : "right",
+			motorRevolutions: motorRevolutions,
+			groundContactPc: Math.round(ticksOnGround / totalTicks * 1000) / 10 + "%"
+		}
+	}
+
+	// If given an undecoded DNA string, decode it first
+	if (typeof dna == "string") {
+		dna = decodeDNA(dna)
+	}
 
 	// Create physiscs engine
 	let engine = Engine.create()
@@ -31,7 +42,7 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 	// Create the renderer
 	var render = Render.create({
 		// Add the canvas element
-		element: document.body,
+		canvas: document.getElementById("beestCanvas"),
 		// Set the created engine
 		engine: engine,
 		options: {
@@ -52,37 +63,49 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 	// How far we are in the circle engine loop
 	let loop = 0
 	// The length of the loop
-	let loopLength = 100
-	// The radius of the circle arm
-	let radius = 15
+	let loopLength = Math.abs(dna.motor.speed)
+	// If the motor direction should be reversed
+	let loopDirection = dna.motor.speed < 0 ? -1 : 1
 	// If the grace period has ended
 	let gracePeriod = true
 	// The hight of the ground in pixels from the top
-	let goundHeight = 193
+	let goundHeight = 150 + dna.groundHeight
+
+	// Total tick events ran
+	let totalTicks = 0
+	// Total ticks where the leg had ground contact
+	let ticksOnGround = 0
+	// Total revolutions of the motor arm
+	let motorRevolutions = 0
 
 	// Run every tick
 	Events.on(runner, "tick", function() {
 		// Set the X and Y of the motor link to the right frame in the loop
-		motorLink.body.pointA.x = 338 + Math.sin((loop / loopLength) * Math.PI * 2) * radius
-		motorLink.body.pointA.y = 92.2 + Math.sin(((loop / loopLength) + 0.25) * Math.PI * 2) * radius
+		motorLink.body.pointA.x = 338 + Math.sin((loop / loopLength) * Math.PI * 2) * dna.motor.radius
+		motorLink.body.pointA.y = 92.2 + Math.sin(((loop / loopLength) + 0.25) * Math.PI * 2) * dna.motor.radius
 
 		// If the grace period has ended
 		if (!gracePeriod) {
 			// Let the top helper link move with the top pipe
-			topLink.body.pointA.x = 300 + Math.sin((loop / loopLength) * Math.PI * 2) * radius * 2
+			topLink.body.pointA.x = 300 + Math.sin((loop / loopLength) * Math.PI * 2) * dna.motor.radius * 2
 
 			// Increment the loop
 			loop++
+			// Add a tick
+			totalTicks++
 			// Reset the loop if we've het the max length
-			if (loop >= loopLength) loop = 0
+			if (loop >= loopLength) {
+				loop = 0
+				motorRevolutions++
+			}
+
+			updateCallback(createCallbackObject())
 		}
 
-		let pipeLength = 65.7
-
 		// Calculate the Y diff with some hardcore math
-		let y = pipeLength / 2 * Math.sin(diagonalBottomPipe.body.angle)
+		let y = dna.legs[7] / 2 * Math.sin(diagonalBottomPipe.body.angle)
 		// Do the same for the X diff but with pythagoras
-		let x = Math.sqrt(Math.pow(pipeLength / 2, 2) - Math.pow(y, 2))
+		let x = Math.sqrt(Math.pow(dna.legs[7] / 2, 2) - Math.pow(y, 2))
 
 		// If the diagonal is to the right of the straigt bottom pipe,
 		// reverse the X so it doesn't float on the wrong side
@@ -97,6 +120,9 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 				x: ground.position.x - (frictionCircle.position.x - (diagonalBottomPipe.body.position.x + x)),
 				y: goundHeight + 100
 			})
+
+			// Mark this tick as being on the ground
+			ticksOnGround++
 
 			// Mark the foot as touching
 			frictionCircle.render.fillStyle = "#0f0"
@@ -122,11 +148,11 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 
 	// Top triangle
 	//  Diagonal	[0]
-	pipes.push(new Pipe(350, 100, 55.8))
+	pipes.push(new Pipe(350, 100, dna.legs[0]))
 	//  Bottom		[1]
-	pipes.push(new Pipe(350, 120, 40.1))
+	pipes.push(new Pipe(350, 120, dna.legs[1]))
 	//  Right		[2]
-	pipes.push(new Pipe(440, 160, 41.5))
+	pipes.push(new Pipe(440, 160, dna.legs[2]))
 
 	// Link top triangle
 	links.push(new Link(pipes[0], pipes[1], 1, [-1, 1]))
@@ -135,9 +161,9 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 
 	// Square connectors
 	//  Right		[3]
-	pipes.push(new Pipe(340, 190, 39.4))
+	pipes.push(new Pipe(340, 190, dna.legs[3]))
 	//  Left		[4]
-	pipes.push(new Pipe(390, 190, 39.4))
+	pipes.push(new Pipe(390, 190, dna.legs[4]))
 
 	// Square to triangle connectors
 	links.push(new Link(pipes[1], pipes[3], 1, [-1, 1]))
@@ -145,12 +171,12 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 
 	// Bottom triangle
 	//  Top			[5]
-	pipes.push(new Pipe(350, 220, 36.7))
+	pipes.push(new Pipe(350, 220, dna.legs[5]))
 	//  Right		[6]
-	let rightBottomPipe = new Pipe(440, 220, 49.0)
+	let rightBottomPipe = new Pipe(440, 220, dna.legs[6])
 	pipes.push(rightBottomPipe)
 	//  Diagonal	[7]
-	let diagonalBottomPipe = new Pipe(340, 100, 65.7)
+	let diagonalBottomPipe = new Pipe(340, 100, dna.legs[7])
 	pipes.push(diagonalBottomPipe)
 
 	// Link bottom triangle to square
@@ -164,9 +190,9 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 
 	// Right motor connectors
 	//  Top			[8]
-	pipes.push(new Pipe(440, 220, 50))
+	pipes.push(new Pipe(440, 220, dna.legs[8]))
 	//  bottom		[9]
-	pipes.push(new Pipe(340, 100, 61.9))
+	pipes.push(new Pipe(340, 100, dna.legs[9]))
 
 	// Connect driving right motor
 	links.push(new Link(pipes[8], pipes[0], 1, [-1, -1]))
@@ -227,7 +253,6 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 	// Add that to the world too
 	World.add(world, ground)
 
-
 	// Change the camera to keep the leg in the middle
 	Render.lookAt(render, {
 		min: {x: 0, y: 0},
@@ -244,16 +269,28 @@ function startSimulation(dnaString, updateCallback, completedCallback) {
 		Body.setPosition(ground, {x: 300, y: goundHeight + 100})
 		// Enable the helping top link and motor loop
 		gracePeriod = false
+		// Reset ground ticks
+		ticksOnGround = 0
 	}, 2000)
+
+	setTimeout(function() {
+		completedCallback(createCallbackObject())
+
+		// Stop the simulation
+		Render.stop(render)
+		World.clear(world)
+		Engine.clear(engine)
+		Runner.stop(runner)
+
+		// Clear the memory addresses
+		render.canvas = null
+		render.context = null
+		render.textures = {}
+	}, 12000)
 }
 
-// startSimulation()
-//
-
-let ins ="bfcfcfcff3fcfffffffffffffffffffe"
-let encoded = decodeDNA(ins)
-
-console.log(JSON.stringify(encoded))
-
-console.log(encodeDNA(encoded))
-console.log(ins)
+startSimulation("bfcfffcff3fcfffffffffffffffffffe", function(update) {
+	console.log("i", update)
+}, function(end) {
+	console.log(end)
+})
