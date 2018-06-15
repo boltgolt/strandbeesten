@@ -4,29 +4,56 @@
 		<meta charset="utf-8">
 		<title>Strandbeest Sim</title>
 
+		<link href="https://fonts.googleapis.com/css?family=Roboto+Mono:300,400" rel="stylesheet">
+		<link rel="stylesheet" href="./assets/css/master.css">
+
 		<script src="https://cdnjs.cloudflare.com/ajax/libs/matter-js/0.12.0/matter.min.js"></script>
+		<script src="./assets/js/ui.js" charset="utf-8"></script>
 		<script src="./assets/js/dna.js" charset="utf-8"></script>
 		<script src="./assets/js/pipe.js" charset="utf-8"></script>
 		<script src="./assets/js/link.js" charset="utf-8"></script>
-		<script src="./assets/js/master.js" charset="utf-8"></script>
-
-		<link rel="stylesheet" href="./assets/css/master.css">
 	</head>
 	<body>
 		<div id="left">
+			<span>Generation</span>
+			<strong id="leftGen">-</strong>
 
+			<span>Beest</span>
+			<strong id="leftBeest">-/-</strong>
 		</div>
 
 		<div>
 			<div id="top">
+				<div>
+					<span>DNA</span>
+					<strong id="topDna">-</strong>
 
+					<span>ID</span>
+					<strong id="topId">-</strong>
+				</div>
+				<div>
+					<span>Direction</span>
+					<strong id="topDirec">-</strong>
+
+					<span>Motor revs</span>
+					<strong id="topMotor">-</strong>
+				</div>
+				<div>
+					<span>Distance</span>
+					<strong id="topDistance">-</strong>
+
+					<span>Ground contact</span>
+					<strong id="topContact">-</strong>
+				</div>
 			</div>
 			<div id="center">
-				<canvas id="beestCanvas" width="800" height="600"></canvas>
+				<canvas id="beestCanvas"></canvas>
 				<div>
 
 				</div>
 			</div>
 		</div>
+
+		<script src="./assets/js/master.js" charset="utf-8"></script>
 	</body>
 </html>

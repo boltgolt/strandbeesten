@@ -115,3 +115,22 @@ function encodeDNA(dna) {
 	// Return the completed hex
 	return hex
 }
+
+/**
+ * Get the ID of a beest
+ * @param  {string}  hex The DNA hex to get the ID from
+ * @return {promise}     A promise resolving to the ID
+ */
+function getID(hex) {
+	// Turn the hex into an ArrayBuffer
+	let buffer = new TextEncoder("utf-8").encode(hex)
+
+	// Create a SHA-1 hash and return the promise
+	return window.crypto.subtle.digest("SHA-1", buffer).then(function(hash) {
+		// Create a view out of the raw hash
+ 		let view = new DataView(hash)
+
+		// Transform the first 4 bytes of the hash to an hex ID
+		return view.getUint32(0).toString(32)
+	})
+}

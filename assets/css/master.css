@@ -1,3 +1,81 @@
 body {
 	margin: 0;
+	display: flex;
+	font-family: "Roboto Mono", monospace;
+	font-weight: lighter;
+}
+
+
+body > div:nth-child(2) {
+	flex-grow: 1;
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+}
+
+
+#left span, #top > div span {
+	display: block;
+	text-transform: uppercase;
+	color: #88869C;
+	font-size: 1.4vh;
+	margin-bottom: -0.6vh;
+	padding-left: 0.2vh;
+}
+
+#left strong, #top > div strong {
+	display: block;
+	color: #9850E0;
+	font-size: 3vh;
+}
+
+#left {
+	width: 20vw;
+	height: 100vh;
+	background: #31303D;
+	padding: 3.8vh 0 0 4vh;
+	box-sizing: border-box;
+}
+
+#left strong {
+	margin-bottom: 2vh;
+	color: #E09E50;
+}
+
+#top {
+	height: 20vh;
+	background: #383742;
+	display: flex;
+}
+
+#top > div {
+	padding-left: 4vh;
+	justify-content: center;
+	display: flex;
+	flex-direction: column;
+	width: 20vh;
+}
+
+#top > div:first-child {
+	width: initial;
+	flex-grow: 1;
+}
+
+#top > div:first-child strong {
+	color: #E0508C;
+}
+
+#top > div strong:first-of-type {
+	margin-bottom: 2vh;
+}
+
+#center {
+	flex-grow: 1;
+	background: #19a919;
+}
+
+#center canvas {
+	height: 80vh;
+	width: 80vw;
+	background: #4186E0 !important;
 }

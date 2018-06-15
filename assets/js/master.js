@@ -13,15 +13,37 @@ const World = Matter.World
 const Bodies = Matter.Bodies
 const Vector = Matter.Vector
 
+// The non-collision group
+// In global scope so the Pipe class can access it without passing it
 let group
 
+/**
+ * Start a beest simulation
+ * @param  {mixed}    dna               Either a HEX dna string or an decoded DNA object
+ * @param  {function} updateCallback    The function to call with an event object on simulation progress
+ * @param  {function} completedCallback The final function to call when the simulation is done
+ */
 function startSimulation(dna, updateCallback, completedCallback) {
+	/**
+	 * Create an event object for a callback
+	 * @return {object} The event object
+	 */
 	function createCallbackObject() {
+		// By default, the beest isn't moving anywhere
+		let direction = "None"
+
+		// Check if it has moved in a direction
+		if (300 - ground.position.x < -2) 		direction = "Left"
+		else if (300 - ground.position.x > 2) 	direction = "Right"
+
 		return {
-			distance: Math.round(Math.abs(300 - ground.position.x) * 100) / 100,
-			direction: 300 - ground.position.x < 0 ? "left" : "right",
-			motorRevolutions: motorRevolutions,
-			groundContactPc: Math.round(ticksOnGround / totalTicks * 1000) / 10 + "%"
+			// Calculate the distance, where 100px = 1m
+			distance: Math.round(Math.abs(300 - ground.position.x)) / 100,
+			// Calculate the percent of time the leg made contact with the ground
+			groundContactPc: Math.round(ticksOnGround / totalTicks * 1000) / 10,
+			// Copy the direction and revs directly
+			direction: direction,
+			motorRevolutions: motorRevolutions
 		}
 	}
 
@@ -46,10 +68,10 @@ function startSimulation(dna, updateCallback, completedCallback) {
 		// Set the created engine
 		engine: engine,
 		options: {
-			width: 800,
-			height: 600,
-			wireframes: false,
-			background: "#4186E0"
+			// Set the height and with relative to the viewport
+			width: window.innerWidth * 0.8,
+			height: window.innerHeight * 0.8,
+			wireframes: false
 		}
 	})
 
@@ -99,6 +121,7 @@ function startSimulation(dna, updateCallback, completedCallback) {
 				motorRevolutions++
 			}
 
+			// Call the update callback with an event object
 			updateCallback(createCallbackObject())
 		}
 
@@ -254,9 +277,17 @@ function startSimulation(dna, updateCallback, completedCallback) {
 	World.add(world, ground)
 
 	// Change the camera to keep the leg in the middle
+	// Let it depend on the viewport so it will be in the center at all times,
+	// no matter on what screen
 	Render.lookAt(render, {
-		min: {x: 0, y: 0},
-		max: {x: 600, y: 300}
+		min: {
+			x: 300 - (window.innerWidth * 0.3),
+			y: -window.innerHeight * 0.2
+		},
+		max: {
+			x: 300 + (window.innerWidth * 0.3),
+			y: 300
+		}
 	})
 
 	// Grace period timer
@@ -271,9 +302,13 @@ function startSimulation(dna, updateCallback, completedCallback) {
 		gracePeriod = false
 		// Reset ground ticks
 		ticksOnGround = 0
+		// Set the top bar static data
+		setTopStatic(dna)
 	}, 2000)
 
+	// Called when the simulation is terminated after 10sec
 	setTimeout(function() {
+		// Call the completed callback with an event object
 		completedCallback(createCallbackObject())
 
 		// Stop the simulation
@@ -290,7 +325,9 @@ function startSimulation(dna, updateCallback, completedCallback) {
 }
 
 startSimulation("bfcfffcff3fcfffffffffffffffffffe", function(update) {
-	console.log("i", update)
+	setTopEvent(update)
 }, function(end) {
 	console.log(end)
+
+	document.getElementById("topDistance").style.color = "#50E05A"
 })
