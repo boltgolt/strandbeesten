@@ -12,6 +12,7 @@
 		<script src="./assets/js/dna.js" charset="utf-8"></script>
 		<script src="./assets/js/pipe.js" charset="utf-8"></script>
 		<script src="./assets/js/link.js" charset="utf-8"></script>
+		<script src="./assets/js/simulator.js" charset="utf-8"></script>
 	</head>
 	<body>
 		<div id="left">
@@ -48,8 +49,16 @@
 			</div>
 			<div id="center">
 				<canvas id="beestCanvas"></canvas>
-				<div>
 
+				<div id="centerOverlay" class="start">
+					<div>
+						<span>Previous result:</span>
+						<strong id="centerOverlayPrevious">0.00m</strong>
+					</div>
+					<div>
+						<span>Next up:</span>
+						<strong id="centerOverlayNext">32e</strong>
+					</div>
 				</div>
 			</div>
 		</div>

@@ -3,6 +3,7 @@ body {
 	display: flex;
 	font-family: "Roboto Mono", monospace;
 	font-weight: lighter;
+	overflow: hidden;
 }
 
 
@@ -14,7 +15,7 @@ body > div:nth-child(2) {
 }
 
 
-#left span, #top > div span {
+#left span, #top > div span, #centerOverlay span {
 	display: block;
 	text-transform: uppercase;
 	color: #88869C;
@@ -23,7 +24,7 @@ body > div:nth-child(2) {
 	padding-left: 0.2vh;
 }
 
-#left strong, #top > div strong {
+#left strong, #top > div strong, #centerOverlay strong {
 	display: block;
 	color: #9850E0;
 	font-size: 3vh;
@@ -70,7 +71,7 @@ body > div:nth-child(2) {
 }
 
 #center {
-	flex-grow: 1;
+	height: 80vh;
 	background: #19a919;
 }
 
@@ -78,4 +79,46 @@ body > div:nth-child(2) {
 	height: 80vh;
 	width: 80vw;
 	background: #4186E0 !important;
+}
+
+#centerOverlay {
+	position: fixed;
+	background: #383742;
+	right: 0;
+	bottom: 0;
+	height: 80vh;
+	width: 80vw;
+	display: flex;
+	opacity: 1;
+	transition: opacity .2s;
+}
+
+#centerOverlay > div {
+	width: 50%;
+	display: flex;
+	flex-direction: column;
+	justify-content: center;
+	align-items: center;
+}
+
+#centerOverlay.start > div:first-child {
+	opacity: 0;
+}
+
+#centerOverlay > div:first-child span {
+	font-size: 2.5vh;
+	margin-bottom: -2vh;
+}
+
+#centerOverlay > div:first-child  strong {
+	font-size: 6vh;
+}
+
+#centerOverlay > div:last-child span {
+	font-size: 2vh;
+	margin-bottom: -1.5vh;
+}
+
+#centerOverlay > div:last-child  strong {
+	font-size: 5vh;
 }

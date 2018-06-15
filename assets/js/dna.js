@@ -44,7 +44,6 @@ function decodeDNA(hex) {
 	// START 1		LENGTH 10		END	10
 	dna.groundHeight = parseInt(bin.substr(1, 10), 2) / 10
 
-
 	// The radius of the motor arm
 	// START 11		LENGTH 8		END	18
 	dna.motor.radius = parseInt(bin.substr(11, 8), 2) / 10
@@ -114,6 +113,35 @@ function encodeDNA(dna) {
 
 	// Return the completed hex
 	return hex
+}
+
+/**
+ * Generate a random DNA object
+ * @return {object} The generated DNA object
+ */
+function generateRandomDNA() {
+	// Start with an empty object
+	let dna = {
+		motor: {},
+		legs: []
+	}
+
+	// Set a random height 		(0		to	102.4)
+	dna.groundHeight = Math.random() * 102.4
+
+	// Set a random motor arm 	(0		to	25.6)
+	dna.motor.radius = Math.random() * 25.6
+
+	// Set a random speed 		(-128	to	128)
+	dna.motor.speed = 128 - (Math.random() * 256)
+
+	// Generate 10 leg lengths	(10		to	112.4)
+	for (let i = 0; i <= 9; i++) {
+		dna.legs.push(10 + Math.random() * 102.4)
+	}
+
+	// Return the generated object
+	return dna
 }
 
 /**
