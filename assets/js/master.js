@@ -245,7 +245,7 @@ function startSimulation(dna, updateCallback, completedCallback) {
 		isStatic: true,
 		render: {
 			sprite: {
-				texture: "ground.png"
+				texture: "./assets/img/ground.png"
 			}
 		}
 	})
