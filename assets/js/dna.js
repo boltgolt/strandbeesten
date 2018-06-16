@@ -127,20 +127,78 @@ function generateRandomDNA() {
 	}
 
 	// Set a random height 		(0		to	102.4)
-	dna.groundHeight = Math.random() * 102.4
+	dna.groundHeight = Math.round(Math.random() * 102.4 * 10) / 10
 
 	// Set a random motor arm 	(0		to	25.6)
-	dna.motor.radius = Math.random() * 25.6
+	dna.motor.radius = Math.round(Math.random() * 25.6 * 10) / 10
 
 	// Set a random speed 		(-128	to	128)
-	dna.motor.speed = 128 - (Math.random() * 256)
+	dna.motor.speed = Math.round(128 - (Math.random() * 256))
 
 	// Generate 10 leg lengths	(10		to	112.4)
 	for (let i = 0; i <= 9; i++) {
-		dna.legs.push(10 + Math.random() * 102.4)
+		dna.legs.push(Math.round(10 + Math.random() * 102.4 * 10) / 10)
 	}
 
 	// Return the generated object
+	return dna
+}
+
+/**
+ * Evolve traits of a DNA object
+ * @param  {object} dna The original DNA object
+ * @return {object}     The evolved DNA object
+ */
+function evolveDNA(dna) {
+	function modulate(value, amp, min, max, decimals) {
+		let modulation = -1 + Math.random()
+
+		value += modulation * amp
+
+		if (value < min) {
+			value = min
+		}
+		if (value > max) {
+			value = max
+		}
+
+		return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
+	}
+
+	// How many traits to change in this evolve
+	// Value between 1 and 3, with a higher chance for a 1
+	let changeCount = Math.round(1 + Math.random() * 2)
+
+	// Will contain the IDs of picked traits to evolve
+	let picks = []
+
+	for (var i = 0; i < changeCount; i++) {
+		let newPick = Math.floor(Math.random() * 12)
+
+		if (picks.indexOf(newPick) == -1) {
+			picks.push(newPick)
+		}
+		else {
+			i--
+		}
+	}
+
+	for (let pick of picks) {
+
+		if (pick < 10) {
+			dna.legs[pick] = modulate(dna.legs[pick], 2, 10, 122.4, 1)
+		}
+		else if (pick == 10) {
+			dna.groundHeight = modulate(dna.groundHeight, 2, 0, 102.4, 1)
+		}
+		else if (pick == 11) {
+			dna.motor.radius = modulate(dna.motor.radius, 1, 0, 25.6, 1)
+		}
+		else if (pick == 12) {
+			dna.motor.speed = modulate(dna.motor.speed, 4, -128, 128, 9)
+		}
+	}
+
 	return dna
 }
 

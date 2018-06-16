@@ -54,7 +54,7 @@ function setOverlayContent(nextDNA, lastDistance) {
 	})
 
 	// If there was a previous beest
-	if (lastDistance) {
+	if (typeof lastDistance !== "undefined") {
 		// Don't hide the left part of the overlay
 		document.getElementById("centerOverlay").classList.remove("start")
 		// Show the distance travelled
