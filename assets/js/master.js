@@ -6,6 +6,11 @@ let winningBeesten = []
 let genNumber = 1
 // The longest a beest has travelled this generation
 let genDistance = 0
+// The global timers 
+let timer = {
+	gen: 0,
+	sim: 0
+}
 
 /**
  * Run though all beesten in a generation
@@ -146,47 +151,40 @@ function evolveGeneration() {
 	setOverlayStatus(true)
 }
 
-//
-// Code below is executed on load
-//
-
-// Generate as many beesten as we will simulate per generation
-for (var i = 0; i < 30; i++) {
-	beesten.push({
-		dna: generateRandomDNA(),
-		contact: -1,
-		distance: 0
-	})
-}
-
-// Start running this generation (non-blocking)
-runGeneration()
-
-// Set the timer to zero
-let timer = {
-	gen: 0,
-	sim: 0
-}
-
-// Update the timer every second
-setInterval(function() {
-	// The HTML IDs of the timer elements
-	const ids = {
-		gen: "leftGenTime",
-		sim: "leftTotalTime"
+// On page load
+document.addEventListener("DOMContentLoaded", function() {
+	// Generate as many beesten as we will simulate per generation
+	for (var i = 0; i < 30; i++) {
+		beesten.push({
+			dna: generateRandomDNA(),
+			contact: -1,
+			distance: 0
+		})
 	}
 
-	// Go though every timer
-	for (let time in timer) {
-		// Increment it
-		timer[time]++
+	// Start running this generation (non-blocking)
+	runGeneration()
 
-		// Get the hours, minutes and seconds that have passed
-		let hours = Math.floor(timer[time] / 3600)
-		let minutes = Math.floor((timer[time] - hours * 3600) / 60)
-		let seconds = Math.floor(timer[time] - hours * 3600 - minutes * 60)
+	// Update the timer every second
+	setInterval(function() {
+		// The HTML IDs of the timer elements
+		const ids = {
+			gen: "leftGenTime",
+			sim: "leftTotalTime"
+		}
 
-		// Put it into the HTML all formatted
-		document.getElementById(ids[time]).innerHTML = hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0")
-	}
-}, 1000)
+		// Go though every timer
+		for (let time in timer) {
+			// Increment it
+			timer[time]++
+
+			// Get the hours, minutes and seconds that have passed
+			let hours = Math.floor(timer[time] / 3600)
+			let minutes = Math.floor((timer[time] - hours * 3600) / 60)
+			let seconds = Math.floor(timer[time] - hours * 3600 - minutes * 60)
+
+			// Put it into the HTML all formatted
+			document.getElementById(ids[time]).innerHTML = hours + ":" + String(minutes).padStart(2, "0") + ":" + String(seconds).padStart(2, "0")
+		}
+	}, 1000)
+})
