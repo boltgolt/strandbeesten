@@ -150,18 +150,32 @@ function generateRandomDNA() {
  * @return {object}     The evolved DNA object
  */
 function evolveDNA(dna) {
+	/**
+	 * Modulate a train within given constraints
+	 * @param  {number} value    The original value to modulate
+	 * @param  {number} amp      The amount of amplification of the modulation
+	 * @param  {number} min      The minimal value for this trait
+	 * @param  {number} max      The minimal value for this trait
+	 * @param  {number} decimals The amount of decimal digits to allow
+	 * @return {number}          The modulated number
+	 */
 	function modulate(value, amp, min, max, decimals) {
+		// Determain the modulation between -1 and 1
 		let modulation = -1 + Math.random()
 
+		// Apply it with the given amplification
 		value += modulation * amp
 
+		// If the modulated value is lower than allowed, set it to that minimum
 		if (value < min) {
 			value = min
 		}
+		// If the modulated value is higher than allowed, set it to that maximum
 		if (value > max) {
 			value = max
 		}
 
+		// Return the new value rounded to the requested decimal point
 		return Math.round(value * Math.pow(10, decimals)) / Math.pow(10, decimals)
 	}
 
@@ -172,19 +186,23 @@ function evolveDNA(dna) {
 	// Will contain the IDs of picked traits to evolve
 	let picks = []
 
+	// Go though each change
 	for (var i = 0; i < changeCount; i++) {
+		// Pick a random ID of a trait
 		let newPick = Math.floor(Math.random() * 12)
 
+		// If this trait hasn't been picked yet, add it to the array
 		if (picks.indexOf(newPick) == -1) {
 			picks.push(newPick)
 		}
+		// Otherwise, try again
 		else {
 			i--
 		}
 	}
 
+	// Go through all picked traits and apply the modulation
 	for (let pick of picks) {
-
 		if (pick < 10) {
 			dna.legs[pick] = modulate(dna.legs[pick], 2, 10, 122.4, 1)
 		}
@@ -199,6 +217,7 @@ function evolveDNA(dna) {
 		}
 	}
 
+	// Return the modified DNA object
 	return dna
 }
 
